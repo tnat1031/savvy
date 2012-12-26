@@ -9,9 +9,10 @@ import urllib2
 import json
 
 HOA_URL = 'http://data.medicare.gov/api/views/f24z-mvb9/rows.json'
+HAC_URL = 'http://data.medicare.gov/api/views/qd2y-qcgs/rows.json'
 
 if __name__ == '__main__':
-	url = urllib2.urlopen(HOA_URL)
+	url = urllib2.urlopen(HAC_URL)
 	j = json.load(url)
 	data = j['data']
 	# types of data include int, list, None, unicode
