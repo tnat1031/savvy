@@ -2,12 +2,19 @@
 
 # TODO:
 # 1. update to pull direct from leapfrog, knee infections
+# 2. automate geocoding if possible
 
+# check for required packages
+if (!library("rjson", logical.return=T)) {
+	install.packages("rjson")
+}
 require("rjson")
 
 urls <- c(OOC_URL = "http://data.medicare.gov/api/views/f24z-mvb9/rows.json",
 		  HAC_URL = "http://data.medicare.gov/api/views/qd2y-qcgs/rows.json",
-		  POC_URL = "http://data.medicare.gov/api/views/nymf-dpgw/rows.json")
+		  POC_URL = "http://data.medicare.gov/api/views/nymf-dpgw/rows.json",
+		  OOC_NAT_URL = "http://data.medicare.gov/api/views/i2h8-79qx/rows.json")
+
 merge_cols <-  c("hospital_name", "address_1", "address_2", "address_3",
 				"city", "state", "zip_code")
 
@@ -69,19 +76,31 @@ unfactor <- function(factors) {
    return(levels(factors)[factors])
 }
 
-## main program ##
+## MAIN PROGRAM ##
+
+# read in data
 df1 <- json2df(urls["HAC_URL"], 2)
 df2 <- json2df(urls["OOC_URL"], 2)
 df3 <- json2df(urls["POC_URL"], 2)
 df4 <- read.csv(file="hai-knee-infection_heart_attack.csv", header=T, sep="\t")
+df5 <- read.csv(file="hosp_name_web_lat_long.csv", header=T, sep="\t")
+name_df <- read.csv(file="GEOSAVVY-TED120712.csv", header=T, sep="\t")
 
 # adjust factors to columns - takes a LONG time
 df1 <- factor2col(df1, "measure", "rate_per_1_000_discharges_", c("hospital_name",
 			"address_1", "address_2", "address_3", "city", "state", "zip_code"))
 
 
-# merge all - automatically subsets to MA only b/c df4 only contains
+# merge all -  should automatically subset to MA only b/c df4 only contains
 # MA hospitals
-final <- merge(df1, df2, by=merge_cols)
-final <- merge(final, df3, by=merge_cols)
-final <- merge(final, df4, by=merge_cols)
+final <- merge(df1, df2, by=merge_cols, all=T)
+final <- merge(final, df3, by=merge_cols, all=T)
+final <- merge(final, df4, by.x="hospital_name", by.y="name", all=T)
+final <- merge(final, df5, by="hospital_name", all=T)
+
+# add full address
+final <- addFullAddress(final)
+
+# explicitly subset to MA
+final <- final[final$state=="MA", ]
+final[] <- lapply(final, "[", drop=T)
