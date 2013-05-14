@@ -1,6 +1,6 @@
 window.onload = function () {
-	var e = d3.select("#barchart");
-	drawBarChart(url=url, element=e, provider_number="010001", plot_fields=plot_fields, color="blue");
+	//var e = d3.select("#barchart");
+	//drawBarChart(url=url, element=e, provider_number="010001", plot_fields=plot_fields, color="blue");
 }
 
 // need to update this to pull data live from HC
@@ -25,6 +25,7 @@ function geocode(address, city, state, zip) {
 	var full_address = [address, city, state, zip].join('+');
 	// need to finish this
 }
+
 
 
 

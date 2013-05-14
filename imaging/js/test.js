@@ -7,10 +7,11 @@
  */
 
 window.onload = function() {
-    $.getJSON('http://api.lincscloud.org/a2/siginfo?callback=?',
-        {q: '{"pert_desc":"sirolimus","cell_id":"MCF7"}' },
-            function(json) {
+    //$.getJSON('http://api.lincscloud.org/a2/siginfo?callback=?',
+    //    {q: '{"pert_desc":"sirolimus","cell_id":"MCF7"}' }, function(json) {
+    //        console.log(json);
+    //})
+    $.getJSON('http://data.medicare.gov/resource/ctux-x8vy.json&callback=?', {}, function(json) {
         console.log(json);
     })
-
 }
