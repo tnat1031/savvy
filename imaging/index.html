@@ -5,9 +5,8 @@
 <link rel="stylesheet" href="css/imaging.css">
 	<head>
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
-		<script src="libraries/jquery-1.9.1.min.js"></script>
-        <script src="libraries/bootstrap/js/bootstrap.min.js"></script>
-        <script src="libraries/d3.v3.min.js"></script>
+		<link href="http://cmap.github.com/cdn/css/main.all.min.css" rel="stylesheet">
+        <script src="http://cmap.github.com/cdn/js/main.all.min.js"></script>
         <script src="js/imaging.js"></script>
         <script src="js/test.js"></script>
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDMVuRHB_NVc4JsMFzCkhv6xZRRIvbbRsI&sensor=false"></script>
@@ -34,7 +33,10 @@
     	</header>
 		<div class="row-fluid">
 			<div class="offset1 span5" id="map"></div>
-			<div class="span5" id="barchart"></div>
+			<div class="span5" id="search_container">
+                <input class="span12" autocomplete="off" type="text" placeholder="Search Hospitals" data-provide="typeahead" id="search">
+                <div class="offset1 span10 backgrid-container" id="table" height="300px"></div>
+			</div>
 
 		</div>
 		

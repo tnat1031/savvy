@@ -26,7 +26,91 @@ function geocode(address, city, state, zip) {
 	// need to finish this
 }
 
+function makeHospitalList(url) {
+  $("#table").hide();
+  $("#table").animate({opacity:0},1);
+  $("#search").change(function (evt) { compound_update() });
+  $("#search").bind('input propertychange', function (evt) { check_for_clear() });
 
+    // configure the typeahead to autocomplete off of RESTful calls to pertinfo
+    var auto_data = [];
+    var pertinfo = 'http://api.lincscloud.org/a2/pertinfo?callback=?'
+    $('#search').typeahead({
+      source: function(query,process){
+            var val = $("#search").val();
+            return $.getJSON(pertinfo,{q:'{"pert_iname":{"$regex":"' + val + '", "$options":"i"}}',
+                          f:'{"pert_iname":1}',
+                          l:100},
+            function(response){
+                response.forEach(function(element){
+                    auto_data.push(element.pert_iname);
+                });
+                auto_data = _.uniq(auto_data);
+                return process(auto_data);
+            });
+        }
+    });
+
+  var Sig = Backbone.Model.extend({
+    initialize: function(attributes, options) {
+      this.cid = this.get('pert_iname');
+    }
+  });
+  var SigCollection = Backbone.Collection.extend({
+    model: Sig,
+    url: 'http://api.lincscloud.org/a2/pertinfo?callback=?',
+    skip: 0
+  })
+
+  var mySig = new Sig();
+  var mySigCollection = new SigCollection();
+
+  var columns = [{name: "pert_iname", label: "Reagent Name", cell: "string"},
+                 {name: "pert_type", label: "Pert Type", cell: "string"},
+                 {name: "num_inst", label: "Experiments", cell: "integer"}];
+
+  var grid = new Backgrid.Grid({
+    columns: columns,
+    collection: mySigCollection
+  });
+
+
+  $("#table").scroll(function(){checkscroll()});
+  $("#table").append(grid.render().$el);
+
+  function checkscroll(){
+    var triggerPoint = 100;
+    var pos = $("#table").scrollTop() + $("#table").height() + triggerPoint;
+    if (!mySigCollection.isLoading && pos > $("#table")[0].scrollHeight){
+      mySigCollection.skip += 30;
+      compound_update();
+    }
+  }
+
+  function compound_update(){
+    $("#table").show();
+    $("#table").animate({opacity:1},500);
+    mySigCollection.isLoading = true;
+    var sig_info_params = {q:'{"pert_iname":{"$regex":"' + $("#search").val() + '","$options":"i"}}',
+                         f:'{"pert_iname":1,"pert_type":1,"num_inst":1}',
+                         l:30,
+                         s:'{"pert_iname":1}',
+                         sk: mySigCollection.skip
+    }
+    mySigCollection.fetch({ data: $.param(sig_info_params),
+                            remove: false,
+                            success: function(){mySigCollection.isLoading = false;}});
+
+  };
+
+  function check_for_clear(){
+    if ($("#search").val() === ""){
+      mySigCollection.skip = 0;
+      $("#table").animate({opacity:0},500);
+      window.setTimeout(function(){mySigCollection.reset(); $("#table").hide();},500);
+    }
+  };
+}
 
 
 function drawBarChart(url, element, provider_number, plot_fields, color) {
